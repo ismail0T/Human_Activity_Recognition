@@ -139,6 +139,9 @@ def run_experiment(repeats=10):
 	# sys.exit()
 	print("total_training_length=> ", str(total_training_length))
 	for epoch in range(num_epochs):
+		correct_all = 0
+		total_all = 0
+
 		for i in range(0, total_training_length, batch_size):
 			if total_training_length - i < batch_size:
 				break
@@ -171,16 +174,21 @@ def run_experiment(repeats=10):
 			correct = (predicted == train_y_batch).sum().item()
 			acc_list.append(correct / total)
 
-			if (i == batch_size) or False:
-				# print("train_y_batch", str(train_y_batch))
-				# print("predicted", str(predicted))
-				# print("....")
-				# print("correct", str(correct))
-				# print("total size", str(total))
+			correct_all += correct
+			total_all += total
 
-				print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%'
-					  .format(epoch + 1, num_epochs, i, total_training_length, loss.item(),
-							  (correct / total) * 100))
+			# if (i == batch_size) or False:
+			# 	# print("train_y_batch", str(train_y_batch))
+			# 	# print("predicted", str(predicted))
+			# 	# print("....")
+			# 	# print("correct", str(correct))
+			# 	# print("total size", str(total))
+			#
+			# 	print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}%'
+			# 		  .format(epoch + 1, num_epochs, i, total_training_length, loss.item(),
+			# 				  (correct / total) * 100))
+		# accuracy of each epoch
+		print('Epoch [{}/{}]'.format(epoch + 1, num_epochs), ", Accuracy: ", str((correct_all / total_all) * 100))
 
 	# Test the model
 	model.eval()
