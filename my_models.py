@@ -23,17 +23,16 @@ class CNN_1D(nn.Module):
         self.layer2 = nn.Sequential(
                 nn.Conv1d(
                     in_channels=128,
-                    out_channels=128,
+                    out_channels=256,
                     kernel_size=3,
                 ),
                 nn.ReLU(),
+                nn.Dropout(self.drop),
                 nn.MaxPool1d(kernel_size=2),
-                nn.Dropout(self.drop)
             )
-        # torch.flatten(t)
 
         self.fc1 = nn.Sequential(
-                nn.Linear(7936, 100) # 253952 = mult of torch.Size([32, 128, 62])
+                nn.Linear(15872, 100) # 253952 = mult of torch.Size([32, 128, 62])
                 , nn.ReLU()
                 ,
             )

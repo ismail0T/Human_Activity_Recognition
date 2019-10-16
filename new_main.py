@@ -9,13 +9,7 @@ import torch
 import torch.nn as nn
 import sys
 from matplotlib import pyplot
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.layers import Flatten
-# from keras.layers import Dropout
-# from keras.layers.convolutional import Conv1D
-# from keras.layers.convolutional import MaxPooling1D
-# from keras.utils import to_categorical
+
 
 # load a single file as a numpy array
 def load_file(filepath):
@@ -111,33 +105,33 @@ def summarize_results(scores):
 	m, s = mean(scores), std(scores)
 	print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
 
+
 # Hyperparameters
-num_epochs = 10
+num_epochs = 20
 num_classes = 6
 batch_size = 32
 learning_rate = 0.001
-
+device = torch.device("cuda")
 
 # run an experiment
 def run_experiment(repeats=10):
-	# load data
-	trainX, trainy, testX, testy = load_dataset()
-	n_timesteps, n_features, n_outputs = trainX.shape[2], trainX.shape[1], trainy.shape[1]
+
+	# n_timesteps, n_features, n_outputs = trainX.shape[2], trainX.shape[1], trainy.shape[1]
 
 	model = CNN_1D()
+	model = model.to(device)
 	criterion = nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
 
 	total_training_length = trainX.shape[0]
 
 	# total_training_length = batch_size * 10
-	num_epochs = 10
+	# num_epochs = 10
 	loss_list = []
 	acc_list = []
 
 	# sys.exit()
-	print("total_training_length=> ", str(total_training_length))
+	# print("total_training_length=> ", str(total_training_length))
 	for epoch in range(num_epochs):
 		correct_all = 0
 		total_all = 0
@@ -149,8 +143,8 @@ def run_experiment(repeats=10):
 			train_x_batch = trainX[i:i + batch_size]
 			train_y_batch = trainy[i:i + batch_size]
 
-			train_x_batch = torch.from_numpy(train_x_batch)
-			train_y_batch = torch.from_numpy(train_y_batch).view(-1)
+			train_x_batch = torch.from_numpy(train_x_batch).to(device)
+			train_y_batch = torch.from_numpy(train_y_batch).view(-1).to(device)
 
 			# print("train_y_batch ", train_y_batch.shape)
 			# return
@@ -188,7 +182,8 @@ def run_experiment(repeats=10):
 			# 		  .format(epoch + 1, num_epochs, i, total_training_length, loss.item(),
 			# 				  (correct / total) * 100))
 		# accuracy of each epoch
-		print('Epoch [{}/{}]'.format(epoch + 1, num_epochs), ", Accuracy: ", str((correct_all / total_all) * 100))
+		if (epoch == num_epochs-1):
+			print('Epoch [{}/{}]'.format(epoch + 1, num_epochs), ", Accuracy (on training): ", str((correct_all / total_all) * 100))
 
 	# Test the model
 	model.eval()
@@ -204,8 +199,8 @@ def run_experiment(repeats=10):
 			test_x_batch = testX[i:i + batch_size]
 			test_y_batch = testy[i:i + batch_size]
 
-			test_x_batch = torch.from_numpy(test_x_batch)
-			test_y_batch = torch.from_numpy(test_y_batch).view(-1)
+			test_x_batch = torch.from_numpy(test_x_batch).to(device)
+			test_y_batch = torch.from_numpy(test_y_batch).view(-1).to(device)
 
 			outputs = model(test_x_batch.float())
 			_, predicted = torch.max(outputs.data, 1)
@@ -225,8 +220,13 @@ def run_experiment(repeats=10):
 	# # summarize results
 	# summarize_results(scores)
 
+
+# load data
+trainX, trainy, testX, testy = load_dataset()
+
 # run the experiment
-run_experiment()
+for i in range(10):
+	run_experiment()
 
 
 # a = torch.randn(32, 101, 9)  # [batch_size, in_channels, len]
